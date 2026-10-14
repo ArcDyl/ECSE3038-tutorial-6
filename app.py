@@ -2,6 +2,7 @@
 # Nothing to write in here today. Today's job is to run it on your VM.
 
 from datetime import datetime, timezone
+from fastapi.middleware.cors import CORSMiddleware
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -20,6 +21,12 @@ readings = db["readings"]
 devices.create_index([("mac", ASCENDING)], unique=True)
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 class Device(BaseModel):
