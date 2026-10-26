@@ -17,6 +17,7 @@ client = MongoClient(os.getenv("MONGODB_URI"), tz_aware=True)
 db = client["tutorial6"]
 devices = db["devices"]
 readings = db["readings"]
+settings = db["settings"]
 
 devices.create_index([("mac", ASCENDING)], unique=True)
 
@@ -102,7 +103,7 @@ def get_latest_reading(mac: str | None = None):
 def put_settings(mac: str, new: Settings, response: Response):
     doc = new.model_dump()
     doc["mac"] = mac
-    result = Settings.replace_one({"mac": mac}, doc, upsert=True)
+    result = settings.replace_one({"mac": mac}, doc, upsert=True)
     if result.upserted_id is not None:
         response.status_code = 201
     doc.pop("_id", None)
@@ -111,7 +112,7 @@ def put_settings(mac: str, new: Settings, response: Response):
 
 @app.get("/settings/{mac}")
 def get_settings(mac: str):
-    doc = Settings.find_one({"mac": mac}, {"_id": 0})
+    doc = settings.find_one({"mac": mac}, {"_id": 0})
     if doc is None:
         raise HTTPException(status_code=404, detail="No settings for MAC " + mac)
     return doc
