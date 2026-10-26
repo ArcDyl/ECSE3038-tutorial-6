@@ -28,7 +28,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 class Device(BaseModel):
     mac: str
     name: str | None = None
@@ -103,7 +102,7 @@ def get_latest_reading(mac: str | None = None):
 def put_settings(mac: str, new: Settings, response: Response):
     doc = new.model_dump()
     doc["mac"] = mac
-    result = settings.replace_one({"mac": mac}, doc, upsert=True)
+    result = Settings.replace_one({"mac": mac}, doc, upsert=True)
     if result.upserted_id is not None:
         response.status_code = 201
     doc.pop("_id", None)
@@ -112,7 +111,7 @@ def put_settings(mac: str, new: Settings, response: Response):
 
 @app.get("/settings/{mac}")
 def get_settings(mac: str):
-    doc = settings.find_one({"mac": mac}, {"_id": 0})
+    doc = Settings.find_one({"mac": mac}, {"_id": 0})
     if doc is None:
         raise HTTPException(status_code=404, detail="No settings for MAC " + mac)
     return doc
